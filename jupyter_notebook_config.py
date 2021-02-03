@@ -42,8 +42,9 @@ c.HybridContentsManager.manager_classes = {
     # Associate the root directory with an S3ContentsManager.
     # This manager will receive all requests that don"t fall under any of the
     # other managers.
-    "personal-bucket": S3ContentsManager,
-    "shared-bucket": S3ContentsManager,
+    'personal-bucket': S3ContentsManager,
+    'shared-bucket': S3ContentsManager,
+    '': FileContentsManager,
 }
 
 
@@ -102,5 +103,8 @@ c.HybridContentsManager.manager_kwargs = {
         'secret_access_key': shared_aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': shared_bucket,
+    },
+    '': {
+        'root_dir': '/opt/app-root/src'
     }
 }
