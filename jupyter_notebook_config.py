@@ -101,8 +101,8 @@ c.HybridContentsManager.manager_kwargs = {
         'bucket': personal_bucket,
     },
     'shared_bucket': {
-        'access_key_id': aws_access_key_id,
-        'secret_access_key': aws_secret_access_key,
+        'access_key_id': shared_aws_access_key_id,
+        'secret_access_key': shared_aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': shared_bucket,
     },
