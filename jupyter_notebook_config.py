@@ -5,6 +5,10 @@ port = int(os.environ.get('JUPYTER_NOTEBOOK_PORT', '8080'))
 c.NotebookApp.ip = '0.0.0.0'
 c.NotebookApp.port = port
 c.NotebookApp.open_browser = False
+c.NotebookApp.quit_button = False
+
+if os.environ.get('JUPYTERHUB_SERVICE_PREFIX'):
+    c.NotebookApp.base_url = os.environ.get('JUPYTERHUB_SERVICE_PREFIX')
 
 password = os.environ.get('JUPYTER_NOTEBOOK_PASSWORD')
 if password:
@@ -33,13 +37,24 @@ from notebook.services.contents.filemanager import FileContentsManager
 # and S3ContentsManager (https://github.com/danielfrg/s3contents) to connect to the datalake
 c.NotebookApp.contents_manager_class = HybridContentsManager
 
-# Intialize Hybrid Contents Manager with local filesystem
+
 c.HybridContentsManager.manager_classes = {
-    # Associate the root directory with a FileContentsManager.
-    # This manager will receive all requests that don't fall under any of the
+    # Associate the root directory with an S3ContentsManager.
+    # This manager will receive all requests that don"t fall under any of the
     # other managers.
-    '': FileContentsManager
+    "personal-bucket": S3ContentsManager,
+    "shared-bucket": S3ContentsManager,
 }
+
+
+# # Intialize Hybrid Contents Manager with local filesystem
+# c.HybridContentsManager.manager_classes = {
+#     # Associate the root directory with a FileContentsManager.
+#     # This manager will receive all requests that don't fall under any of the
+#     # other managers.
+#     '': FileContentsManager
+# }
+
 
 # Get S3 credentials from environment variables
 aws_access_key_id = os.environ.get("accessKeyID")
@@ -58,7 +73,7 @@ if (aws_access_key_id and aws_access_key_id!=None): # Make sure we have usable S
                         use_ssl = True if 'https' in endpoint_url else False ) 
     # Enumerate all accessible buckets and create a folder entry in HybridContentsManager
     for bucket in s3.buckets.all():
-        c.HybridContentsManager.manager_classes.update({bucket.name: S3ContentsManager})
+        personal_bucket = bucket.name
 
 # Add datalake connection information for shared S3
 if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sure we have usable S3 informations are there before configuring
@@ -70,36 +85,22 @@ if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sur
                         use_ssl = True if 'https' in endpoint_url else False ) 
     # Enumerate all accessible buckets and create a folder entry in HybridContentsManager
     for bucket in shared_s3.buckets.all():
-        c.HybridContentsManager.manager_classes.update({bucket.name: S3ContentsManager})
+        shared_bucket = bucket.name
+
 
 # Initalize arguments for local filesystem
 c.HybridContentsManager.manager_kwargs = {
     # Args for the FileContentsManager mapped to /directory
-    '': {
-        'root_dir': '/opt/app-root/src'
+    'personal_bucket': {
+        'access_key_id': aws_access_key_id,
+        'secret_access_key': aws_secret_access_key,
+        'endpoint_url': endpoint_url,
+        'bucket': personal_bucket,
+    },
+    'shared_bucket': {
+        'access_key_id': shared_aws_access_key_id,
+        'secret_access_key': shared_aws_secret_access_key,
+        'endpoint_url': endpoint_url,
+        'bucket': shared_bucket,
     }
 }
-
-# Add datalake connections arguments
-if (aws_access_key_id and aws_access_key_id!=None):
-    # We don't have to reinitialize the connection, thanks for previous "for" not being scoped
-    # Enumerate all buckets and configure access
-    for bucket in s3.buckets.all():
-        c.HybridContentsManager.manager_kwargs.update({bucket.name: {
-            'access_key_id': aws_access_key_id,
-            'secret_access_key': aws_secret_access_key,
-            'endpoint_url': endpoint_url,
-            'bucket': bucket.name
-        } })
-
-# Add datalake connections arguments for Shared S3
-if (shared_aws_access_key_id and shared_aws_secret_access_key!=None):
-    # We don't have to reinitialize the connection, thanks for previous "for" not being scoped
-    # Enumerate all buckets and configure access
-    for bucket in shared_s3.buckets.all():
-        c.HybridContentsManager.manager_kwargs.update({bucket.name: {
-            'access_key_id': shared_aws_access_key_id,
-            'secret_access_key': shared_aws_secret_access_key,
-            'endpoint_url': endpoint_url,
-            'bucket': bucket.name
-        } })
