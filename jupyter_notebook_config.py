@@ -38,15 +38,6 @@ from notebook.services.contents.largefilemanager import LargeFileManager
 # and S3ContentsManager (https://github.com/danielfrg/s3contents) to connect to the datalake
 c.NotebookApp.contents_manager_class = HybridContentsManager
 
-c.HybridContentsManager.manager_classes = {
-    # Associate the root directory with an S3ContentsManager.
-    # This manager will receive all requests that don"t fall under any of the
-    # other managers.
-    "": S3ContentsManager,
-    # Associate /directory with a LargeFileManager.
-    "local_directory": LargeFileManager,
-}
-
 
 # # Intialize Hybrid Contents Manager with local filesystem
 # c.HybridContentsManager.manager_classes = {
@@ -89,17 +80,27 @@ if (aws_access_key_id and aws_access_key_id!=None): # Make sure we have usable S
 #     for bucket in shared_s3.buckets.all():
 #         shared_bucket = bucket.name
 
- 
+c.HybridContentsManager.manager_classes = {
+    # Associate the root directory with an S3ContentsManager.
+    # This manager will receive all requests that don"t fall under any of the
+    # other managers.
+    "personal_bucket": S3ContentsManager,
+    # Associate /directory with a LargeFileManager.
+    "": LargeFileManager,
+}
+    
+    
+    
 # Initalize arguments for local filesystem
 c.HybridContentsManager.manager_kwargs = {
     # Args for the FileContentsManager mapped to /directory
-    '': {
+    'personal_bucket': {
         'access_key_id': aws_access_key_id,
         'secret_access_key': aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': personal_bucket,
     },
-    'local_directory': {
+    '': {
         'root_dir': '/opt/app-root/src'
     }
 }
