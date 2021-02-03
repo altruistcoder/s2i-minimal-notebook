@@ -36,7 +36,7 @@ from notebook.services.contents.largefilemanager import LargeFileManager
 # We use HybridContentsManager (https://github.com/viaduct-ai/hybridcontents),
 # FileContentsManager for accessing local volumes
 # and S3ContentsManager (https://github.com/danielfrg/s3contents) to connect to the datalake
-c.NotebookApp.contents_manager_class = HybridContentsManager
+# c.NotebookApp.contents_manager_class = HybridContentsManager
 
 
 # # Intialize Hybrid Contents Manager with local filesystem
@@ -80,33 +80,43 @@ if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sur
     for bucket in shared_s3.buckets.all():
         shared_bucket = bucket.name
 
-c.HybridContentsManager.manager_classes = {
-    # Associate the root directory with an S3ContentsManager.
-    # This manager will receive all requests that don"t fall under any of the
-    # other managers.
-    "": S3ContentsManager,
-    "": S3ContentsManager,
-    # Associate /directory with a LargeFileManager.
-    "": LargeFileManager,
-}
+
+# Tell Jupyter to use S3ContentsManager for all storage.
+c.NotebookApp.contents_manager_class = S3ContentsManager
+c.S3ContentsManager.access_key_id = aws_access_key_id
+c.S3ContentsManager.secret_access_key = aws_secret_access_key
+# c.S3ContentsManager.session_token = "{{ AWS Session Token / IAM Session Token }}"
+c.S3ContentsManager.endpoint_url = endpoint_url
+c.S3ContentsManager.bucket = personal_bucket
+        
+        
+# c.HybridContentsManager.manager_classes = {
+#     # Associate the root directory with an S3ContentsManager.
+#     # This manager will receive all requests that don"t fall under any of the
+#     # other managers.
+#     "": S3ContentsManager,
+#     "": S3ContentsManager,
+#     # Associate /directory with a LargeFileManager.
+#     "": LargeFileManager,
+# }
 
 
-# Initalize arguments for local filesystem
-c.HybridContentsManager.manager_kwargs = {
-    # Args for the FileContentsManager mapped to /directory
-    '': {
-        'access_key_id': aws_access_key_id,
-        'secret_access_key': aws_secret_access_key,
-        'endpoint_url': endpoint_url,
-        'bucket': personal_bucket,
-    },
-    '': {
-        'access_key_id': shared_aws_access_key_id,
-        'secret_access_key': shared_aws_secret_access_key,
-        'endpoint_url': endpoint_url,
-        'bucket': shared_bucket,
-    },
-    '': {
-        'root_dir': '/opt/app-root/src'
-    }
-}
+# # Initalize arguments for local filesystem
+# c.HybridContentsManager.manager_kwargs = {
+#     # Args for the FileContentsManager mapped to /directory
+#     '': {
+#         'access_key_id': aws_access_key_id,
+#         'secret_access_key': aws_secret_access_key,
+#         'endpoint_url': endpoint_url,
+#         'bucket': personal_bucket,
+#     },
+#     '': {
+#         'access_key_id': shared_aws_access_key_id,
+#         'secret_access_key': shared_aws_secret_access_key,
+#         'endpoint_url': endpoint_url,
+#         'bucket': shared_bucket,
+#     },
+#     '': {
+#         'root_dir': '/opt/app-root/src'
+#     }
+# }
