@@ -68,29 +68,29 @@ if (aws_access_key_id and aws_access_key_id!=None): # Make sure we have usable S
         personal_bucket = bucket.name
 
         
-# # Add datalake connection information for shared S3
-# if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sure we have usable S3 informations are there before configuring
-#     # Initialize S3 connection (us-east-1 seems to be needed even when it is not used, in Ceph for example)
-#     shared_s3 = boto3.resource('s3','us-east-2',
-#                         endpoint_url=endpoint_url,
-#                         aws_access_key_id = shared_aws_access_key_id,
-#                         aws_secret_access_key = shared_aws_secret_access_key,
-#                         use_ssl = True if 'https' in endpoint_url else False ) 
-#     # Enumerate all accessible buckets and create a folder entry in HybridContentsManager
-#     for bucket in shared_s3.buckets.all():
-#         shared_bucket = bucket.name
+# Add datalake connection information for shared S3
+if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sure we have usable S3 informations are there before configuring
+    # Initialize S3 connection (us-east-1 seems to be needed even when it is not used, in Ceph for example)
+    shared_s3 = boto3.resource('s3','us-east-2',
+                        endpoint_url=endpoint_url,
+                        aws_access_key_id = shared_aws_access_key_id,
+                        aws_secret_access_key = shared_aws_secret_access_key,
+                        use_ssl = True if 'https' in endpoint_url else False ) 
+    # Enumerate all accessible buckets and create a folder entry in HybridContentsManager
+    for bucket in shared_s3.buckets.all():
+        shared_bucket = bucket.name
 
 c.HybridContentsManager.manager_classes = {
     # Associate the root directory with an S3ContentsManager.
     # This manager will receive all requests that don"t fall under any of the
     # other managers.
     "personal_bucket": S3ContentsManager,
+    "shared_bucket": S3ContentsManager,
     # Associate /directory with a LargeFileManager.
     "": LargeFileManager,
 }
-    
-    
-    
+
+
 # Initalize arguments for local filesystem
 c.HybridContentsManager.manager_kwargs = {
     # Args for the FileContentsManager mapped to /directory
@@ -99,6 +99,12 @@ c.HybridContentsManager.manager_kwargs = {
         'secret_access_key': aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': personal_bucket,
+    },
+    'shared_bucket': {
+        'access_key_id': aws_access_key_id,
+        'secret_access_key': aws_secret_access_key,
+        'endpoint_url': endpoint_url,
+        'bucket': shared_bucket,
     },
     '': {
         'root_dir': '/opt/app-root/src'
