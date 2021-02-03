@@ -5,7 +5,12 @@ port = int(os.environ.get('JUPYTER_NOTEBOOK_PORT', '8080'))
 c.NotebookApp.ip = '0.0.0.0'
 c.NotebookApp.port = port
 c.NotebookApp.open_browser = False
+c.NotebookApp.quit_button = False
 
+c.NotebookApp.notebook_dir = '/opt/app-root/src'
+
+if os.environ.get('JUPYTERHUB_SERVICE_PREFIX'):
+    c.NotebookApp.base_url = os.environ.get('JUPYTERHUB_SERVICE_PREFIX')
 
 password = os.environ.get('JUPYTER_NOTEBOOK_PASSWORD')
 if password:
