@@ -84,8 +84,8 @@ c.HybridContentsManager.manager_classes = {
     # Associate the root directory with an S3ContentsManager.
     # This manager will receive all requests that don"t fall under any of the
     # other managers.
-    "personal_bucket": S3ContentsManager,
-    "shared_bucket": S3ContentsManager,
+    "": S3ContentsManager,
+    "": S3ContentsManager,
     # Associate /directory with a LargeFileManager.
     "": LargeFileManager,
 }
@@ -94,13 +94,13 @@ c.HybridContentsManager.manager_classes = {
 # Initalize arguments for local filesystem
 c.HybridContentsManager.manager_kwargs = {
     # Args for the FileContentsManager mapped to /directory
-    'personal_bucket': {
+    '': {
         'access_key_id': aws_access_key_id,
         'secret_access_key': aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': personal_bucket,
     },
-    'shared_bucket': {
+    '': {
         'access_key_id': shared_aws_access_key_id,
         'secret_access_key': shared_aws_secret_access_key,
         'endpoint_url': endpoint_url,
