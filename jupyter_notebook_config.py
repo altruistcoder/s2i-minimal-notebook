@@ -30,21 +30,21 @@ if os.path.exists(image_config_file):
 import boto3
 from s3contents import S3ContentsManager
 from hybridcontents import HybridContentsManager
-from notebook.services.contents.filemanager import FileContentsManager
+# from notebook.services.contents.filemanager import FileContentsManager
+from notebook.services.contents.largefilemanager import LargeFileManager
 
 # We use HybridContentsManager (https://github.com/viaduct-ai/hybridcontents),
 # FileContentsManager for accessing local volumes
 # and S3ContentsManager (https://github.com/danielfrg/s3contents) to connect to the datalake
 c.NotebookApp.contents_manager_class = HybridContentsManager
 
-
 c.HybridContentsManager.manager_classes = {
     # Associate the root directory with an S3ContentsManager.
     # This manager will receive all requests that don"t fall under any of the
     # other managers.
-    'personal-bucket': S3ContentsManager,
-    'shared-bucket': S3ContentsManager,
-    '': FileContentsManager,
+    "": S3ContentsManager,
+    # Associate /directory with a LargeFileManager.
+    "local_directory": LargeFileManager,
 }
 
 
@@ -76,35 +76,30 @@ if (aws_access_key_id and aws_access_key_id!=None): # Make sure we have usable S
     for bucket in s3.buckets.all():
         personal_bucket = bucket.name
 
-# Add datalake connection information for shared S3
-if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sure we have usable S3 informations are there before configuring
-    # Initialize S3 connection (us-east-1 seems to be needed even when it is not used, in Ceph for example)
-    shared_s3 = boto3.resource('s3','us-east-2',
-                        endpoint_url=endpoint_url,
-                        aws_access_key_id = shared_aws_access_key_id,
-                        aws_secret_access_key = shared_aws_secret_access_key,
-                        use_ssl = True if 'https' in endpoint_url else False ) 
-    # Enumerate all accessible buckets and create a folder entry in HybridContentsManager
-    for bucket in shared_s3.buckets.all():
-        shared_bucket = bucket.name
+        
+# # Add datalake connection information for shared S3
+# if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sure we have usable S3 informations are there before configuring
+#     # Initialize S3 connection (us-east-1 seems to be needed even when it is not used, in Ceph for example)
+#     shared_s3 = boto3.resource('s3','us-east-2',
+#                         endpoint_url=endpoint_url,
+#                         aws_access_key_id = shared_aws_access_key_id,
+#                         aws_secret_access_key = shared_aws_secret_access_key,
+#                         use_ssl = True if 'https' in endpoint_url else False ) 
+#     # Enumerate all accessible buckets and create a folder entry in HybridContentsManager
+#     for bucket in shared_s3.buckets.all():
+#         shared_bucket = bucket.name
 
-
+ 
 # Initalize arguments for local filesystem
 c.HybridContentsManager.manager_kwargs = {
     # Args for the FileContentsManager mapped to /directory
-    'personal_bucket': {
+    '': {
         'access_key_id': aws_access_key_id,
         'secret_access_key': aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': personal_bucket,
     },
-    'shared_bucket': {
-        'access_key_id': shared_aws_access_key_id,
-        'secret_access_key': shared_aws_secret_access_key,
-        'endpoint_url': endpoint_url,
-        'bucket': shared_bucket,
-    },
-    '': {
+    'local_directory': {
         'root_dir': '/opt/app-root/src'
     }
 }
