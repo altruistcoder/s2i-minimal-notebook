@@ -2,8 +2,6 @@ import os
 
 port = int(os.environ.get('JUPYTER_NOTEBOOK_PORT', '8080'))
 
-c = get_config()
-
 c.NotebookApp.ip = '0.0.0.0'
 c.NotebookApp.port = port
 c.NotebookApp.open_browser = False
@@ -34,6 +32,8 @@ from s3contents import S3ContentsManager
 from hybridcontents import HybridContentsManager
 # from notebook.services.contents.filemanager import FileContentsManager
 from notebook.services.contents.largefilemanager import LargeFileManager
+
+c = get_config()
 
 # We use HybridContentsManager (https://github.com/viaduct-ai/hybridcontents),
 # FileContentsManager for accessing local volumes
@@ -101,12 +101,14 @@ c.HybridContentsManager.manager_kwargs = {
         'secret_access_key': aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': personal_bucket,
+        'root_dir': '/opt/app-root/src',
     },
     'shared_bucket': {
         'access_key_id': shared_aws_access_key_id,
         'secret_access_key': shared_aws_secret_access_key,
         'endpoint_url': endpoint_url,
         'bucket': shared_bucket,
+        'root_dir': '/opt/app-root/src',
     },
     '': {
         'root_dir': '/opt/app-root/src'
