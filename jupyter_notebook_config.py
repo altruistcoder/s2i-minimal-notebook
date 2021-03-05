@@ -30,19 +30,20 @@ if os.path.exists(image_config_file):
 import boto3
 from s3contents import S3ContentsManager
 from hybridcontents import HybridContentsManager
-from notebook.services.contents.filemanager import FileContentsManager
+from notebook.services.contents.largefilemanager import LargeFileManager
+
 
 # We use HybridContentsManager (https://github.com/viaduct-ai/hybridcontents),
-# FileContentsManager for accessing local volumes
+# LargeFileManager for accessing local volumes
 # and S3ContentsManager (https://github.com/danielfrg/s3contents) to connect to the datalake
 c.NotebookApp.contents_manager_class = HybridContentsManager
 
 # Intialize Hybrid Contents Manager with local filesystem
 c.HybridContentsManager.manager_classes = {
-    # Associate the root directory with a FileContentsManager.
+    # Associate the root directory with a LargeFileManager.
     # This manager will receive all requests that don't fall under any of the
     # other managers.
-    '': FileContentsManager
+    '': LargeFileManager
 }
 
 # Get S3 credentials from environment variables
@@ -78,7 +79,7 @@ if (shared_aws_access_key_id and shared_aws_secret_access_key!=None): # Make sur
 
 # Initalize arguments for local filesystem
 c.HybridContentsManager.manager_kwargs = {
-    # Args for the FileContentsManager mapped to /directory
+    # Args for the LargeFileManager mapped to /directory
     '': {
         'root_dir': '/opt/app-root/src'
     }
