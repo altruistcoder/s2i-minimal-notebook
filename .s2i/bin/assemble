@@ -37,6 +37,7 @@ rm -rf $HOME/.node-gyp
 # Copy into place default config files for Jupyter and Apache webdav.
 
 cp ${APP_ROOT}/src/jupyter_notebook_config.py /opt/app-root/etc/
+cp ${APP_ROOT}/src/jupyter_server_config.py /opt/app-root/etc/
 cp ${APP_ROOT}/src/jupyter_kernel_gateway_config.py /opt/app-root/etc/
 cp ${APP_ROOT}/src/httpd-webdav.conf /opt/app-root/etc/
 
